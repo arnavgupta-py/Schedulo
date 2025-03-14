@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedulo - AI Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Markdown support -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+    <!-- Syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+    
+    <!-- Main layout -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="logo"><i class="fas fa-calendar-alt"></i></span>
+                <h1>Schedulo</h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active">
+                        <a href="{{ url_for('chatbot.index') }}">
+                            <i class="fas fa-robot"></i>
+                            <span>AI Assistant</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('calendar.index') }}">
+                            <i class="fas fa-calendar-week"></i>
+                            <span>Timetable</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('scheduler.index') }}">
+                            <i class="fas fa-magic"></i>
+                            <span>Optimizer</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-users"></i>
+                            <span>Teachers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-book"></i>
+                            <span>Subjects</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-building"></i>
+                            <span>Venues</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-section">
+                <div class="user-profile">
+                    <div class="avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-info">
+                        <h3>{{ session.get('user_name', 'User') }}</h3>
+                        <p>{{ session.get('user_role', 'user') }}</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('auth.logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1><i class="fas fa-robot"></i> AI Assistant</h1>
+                <div class="actions">
+                    <button id="clearChat" class="action-btn">
+                        <i class="fas fa-trash-alt"></i>
+                        <span>Clear Chat</span>
+                    </button>
+                    <button id="generateTimetable" class="action-btn primary-btn" {% if not database_ready %}disabled{% endif %}>
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Generate Timetable</span>
+                    </button>
+
+                    <div class="form-group">
+                        <label for="yearSelect">Select Year (Optional):</label>
+                        <select id="yearSelect" class="form-control">
+                            <option value="">All Years (Not Recommended)</option>
+                            <!-- These will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+            </header>
+            
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Welcome message -->
+                    <div class="message system">
+                        <div class="message-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="message-content">
+                            <p>👋 Welcome to Schedulo! I'm your AI assistant for academic scheduling.</p>
+                            <p>I can help you with:</p>
+                            <ul>
+                                <li>Managing academic years, divisions, and batches</li>
+                                <li>Adding teachers, subjects, and venues</li>
+                                <li>Setting up events and constraints</li>
+                                <li>Answering questions about your schedule</li>
+                            </ul>
+                            <p>What would you like to do today?</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Chat history will be loaded here -->
+                    {% for message in chat_history %}
+                    <div class="message {{ message.role }}">
+                        <div class="message-avatar">
+                            {% if message.role == 'user' %}
+                            <i class="fas fa-user"></i>
+                            {% else %}
+                            <i class="fas fa-robot"></i>
+                            {% endif %}
+                        </div>
+                        <div class="message-content">
+                            {{ message.message | safe }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="chat-input">
+                    <textarea id="messageInput" placeholder="Type your message here..." rows="1"></textarea>
+                    <button id="sendMessage" class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Processing your request...</p>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+</body>
+</html>

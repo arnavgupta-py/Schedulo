@@ -1,0 +1,148 @@
+/* Constraints page specific styles */
+.constraints-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(22, 33, 62, 0.4);
+    border-radius: var(--border-radius);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding: 1.5rem;
+    gap: 2rem;
+}
+
+.constraints-section {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--box-shadow);
+}
+
+.constraints-section h2 {
+    display: flex;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.constraints-section h2 i {
+    margin-right: 0.5rem;
+}
+
+.constraint-description {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    border-left: 3px solid rgba(255, 255, 255, 0.1);
+    padding-left: 1rem;
+}
+
+.constraint-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.constraint-item {
+    background: rgba(30, 42, 58, 0.4);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.constraint-item.hard {
+    border-left: 4px solid var(--error);
+}
+
+.constraint-item.soft {
+    border-left: 4px solid var(--info);
+}
+
+.constraint-header {
+    padding: 1rem 1.5rem;
+    background: rgba(15, 14, 23, 0.3);
+    display: flex;
+    align-items: center;
+}
+
+.constraint-title {
+    font-weight: 600;
+    flex: 1;
+}
+
+.constraint-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    margin-left: 0.5rem;
+}
+
+.constraint-weight {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-left: 1rem;
+}
+
+.constraint-body {
+    padding: 1rem 1.5rem;
+}
+
+.constraint-body p {
+    margin: 0 0 0.75rem 0;
+}
+
+.constraint-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.constraint-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.constraint-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.new-constraint {
+    border-left: 4px solid var(--primary-color);
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .constraint-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .constraint-badge, .constraint-weight {
+        margin-left: 0;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}

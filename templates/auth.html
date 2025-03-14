@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedulo - Authentication</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+    
+    <div class="auth-page">
+        <div class="left-panel">
+            <div class="brand">
+                <span class="logo"><i class="fas fa-calendar-alt"></i></span>
+                <h1>Schedulo</h1>
+            </div>
+            <div class="hero-text">
+                <h2>Academic Scheduling<br>Made <span class="accent-text">Simple</span></h2>
+                <p>Manage your timetables efficiently with our intelligent scheduling assistant.</p>
+                
+                <!-- Featured benefits -->
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-magic"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>AI-Powered</h3>
+                            <p>Intelligent chatbot to assist in scheduling</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>Fast & Efficient</h3>
+                            <p>Generate optimized timetables instantly</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <div class="feature-text">
+                            <h3>Secure</h3>
+                            <p>Your data is protected and private</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Decorative element -->
+            <div class="floating-image">
+                <div class="calendar-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="auth-container">
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <div class="tab {% if active_tab == 'login' %}active{% endif %}" data-tab="login">Login</div>
+                        <div class="tab {% if active_tab == 'signup' %}active{% endif %}" data-tab="signup">Sign Up</div>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                <div class="flash-messages">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">
+                                    {% if category == 'success' %}<i class="fas fa-check-circle"></i>{% endif %}
+                                    {% if category == 'danger' %}<i class="fas fa-exclamation-circle"></i>{% endif %}
+                                    {% if category == 'warning' %}<i class="fas fa-exclamation-triangle"></i>{% endif %}
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" method="post" action="{{ url_for('auth.login') }}" class="auth-form {% if active_tab != 'login' %}hidden{% endif %}">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <div class="input-group">
+                            <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                            <input type="email" id="login-email" name="email" placeholder="Your email address" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="input-group">
+                            <span class="input-icon"><i class="fas fa-lock"></i></span>
+                            <input type="password" id="login-password" name="password" placeholder="Your password" required>
+                            <span class="password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group checkbox">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn primary-btn">
+                            <span>Login</span>
+                            <i class="fas fa-arrow-right"></i>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Signup Form -->
+                <form id="signup-form" method="post" action="{{ url_for('auth.signup') }}" class="auth-form {% if active_tab != 'signup' %}hidden{% endif %}">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name">First Name</label>
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fas fa-user"></i></span>
+                                <input type="text" id="first_name" name="first_name" placeholder="First name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="last_name">Last Name</label>
+                            <div class="input-group">
+                                <span class="input-icon"><i class="fas fa-user"></i></span>
+                                <input type="text" id="last_name" name="last_name" placeholder="Last name" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <div class="input-group">
+                            <span class="input-icon"><i class="fas fa-envelope"></i></span>
+                            <input type="email" id="signup-email" name="email" placeholder="Your email address" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <div class="input-group">
+                            <span class="input-icon"><i class="fas fa-lock"></i></span>
+                            <input type="password" id="signup-password" name="password" placeholder="Create a password" required>
+                            <span class="password-toggle">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="strength-meter">
+                            <div class="strength-meter-fill" data-strength="0"></div>
+                        </div>
+                        <div class="strength-text"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-icon"><i class="fas fa-lock"></i></span>
+                            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm password" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn primary-btn">
+                            <span>Create Account</span>
+                            <i class="fas fa-user-plus"></i>
+                            <span class="btn-loader"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+</body>
+</html>

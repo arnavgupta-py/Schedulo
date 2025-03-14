@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedulo - Timetable Optimizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/scheduler.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+    
+    <!-- Main layout -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="logo"><i class="fas fa-calendar-alt"></i></span>
+                <h1>Schedulo</h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="{{ url_for('chatbot.index') }}">
+                            <i class="fas fa-robot"></i>
+                            <span>AI Assistant</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('calendar.index') }}">
+                            <i class="fas fa-calendar-week"></i>
+                            <span>Timetable</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="{{ url_for('scheduler.index') }}">
+                            <i class="fas fa-magic"></i>
+                            <span>Optimizer</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-users"></i>
+                            <span>Teachers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-book"></i>
+                            <span>Subjects</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-building"></i>
+                            <span>Venues</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-section">
+                <div class="user-profile">
+                    <div class="avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-info">
+                        <h3>{{ session.get('user_name', 'User') }}</h3>
+                        <p>{{ session.get('user_role', 'user') }}</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('auth.logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1><i class="fas fa-magic"></i> Timetable Optimizer</h1>
+                <div class="timetable-controls">
+                    <a href="{{ url_for('scheduler.list_constraints') }}" class="action-btn">
+                        <i class="fas fa-list"></i>
+                        <span>Constraints</span>
+                    </a>
+                    
+                    <a href="{{ url_for('calendar.index') }}" class="action-btn">
+                        <i class="fas fa-calendar-week"></i>
+                        <span>View Timetable</span>
+                    </a>
+                </div>
+            </header>
+            
+            <div class="optimizer-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="message-container">
+                            {% for category, message in messages %}
+                                <div class="alert {{ category }}">
+                                    <span class="alert-icon">
+                                        {% if category == 'success' %}
+                                            <i class="fas fa-check-circle"></i>
+                                        {% elif category == 'error' %}
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        {% elif category == 'warning' %}
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        {% else %}
+                                            <i class="fas fa-info-circle"></i>
+                                        {% endif %}
+                                    </span>
+                                    <span class="alert-message">{{ message }}</span>
+                                    <button class="alert-close">&times;</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                <div class="card-container">
+                    <div class="optimizer-card">
+                        <div class="card-header">
+                            <h2>Start Optimization</h2>
+                        </div>
+                        <div class="card-body">
+                            {% if ortools_available %}
+                                <form method="POST" action="{{ url_for('scheduler.optimize_timetable') }}">
+                                    <div class="form-group">
+                                        <label for="division_id">Division (Optional)</label>
+                                        <select name="division_id" id="division_id" class="form-control">
+                                            <option value="">All Divisions</option>
+                                            {% for division in divisions %}
+                                                <option value="{{ division.id }}">{{ division.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="form-text">Optimize timetable for a specific division</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="year_id">Academic Year (Optional)</label>
+                                        <select name="year_id" id="year_id" class="form-control">
+                                            <option value="">All Years</option>
+                                            {% for year in academic_years %}
+                                                <option value="{{ year.symbol }}">{{ year.symbol }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="form-text">Optimize timetable for a specific academic year</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="time_limit">Time Limit (seconds)</label>
+                                        <input type="number" name="time_limit" id="time_limit" class="form-control" 
+                                               value="30" min="5" max="300">
+                                        <small class="form-text">Maximum time for optimization (5-300 seconds)</small>
+                                    </div>
+                                    
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn primary-btn">
+                                            <i class="fas fa-play"></i> Start Optimization
+                                        </button>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <div class="unavailable-message">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <h3>OR-Tools Not Available</h3>
+                                    <p>The optimization engine is not available. Please make sure OR-Tools is installed and configured correctly.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="optimizer-card">
+                        <div class="card-header">
+                            <h2>Active Jobs</h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="active-jobs-container">
+                                {% if active_jobs %}
+                                    <div class="job-list">
+                                        {% for job in active_jobs %}
+                                            <div class="job-item" data-job-id="{{ job.job_id }}">
+                                                <div class="job-info">
+                                                    <span class="job-id">{{ job.job_id }}</span>
+                                                    <span class="job-status 
+                                                        {% if job.status == 'COMPLETED' %}status-completed{% endif %}
+                                                        {% if job.status == 'SOLVING' %}status-running{% endif %}
+                                                        {% if job.status == 'ERROR' %}status-error{% endif %}
+                                                    ">{{ job.status }}</span>
+                                                    <span class="job-time">{{ job.elapsed_seconds|round|int }}s</span>
+                                                </div>
+                                                <div class="job-actions">
+                                                    <a href="{{ url_for('scheduler.job_status', job_id=job.job_id) }}" class="btn secondary-btn btn-sm">
+                                                        <i class="fas fa-eye"></i> View
+                                                    </a>
+                                                    {% if job.status == 'SOLVING' %}
+                                                    <form method="POST" action="{{ url_for('scheduler.stop_optimization', job_id=job.job_id) }}">
+                                                        <button type="submit" class="btn danger-btn btn-sm">
+                                                            <i class="fas fa-stop"></i> Stop
+                                                        </button>
+                                                    </form>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="no-jobs-message">
+                                        <i class="fas fa-hourglass-start"></i>
+                                        <p>No active optimization jobs</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h2>About the Optimizer</h2>
+                    <p>The Timetable Optimizer uses advanced constraint solving technology to automatically generate optimal timetables. The system considers:</p>
+                    <ul>
+                        <li><strong>Hard Constraints:</strong> Rules that must be respected (e.g., no teacher can be in two places at once)</li>
+                        <li><strong>Soft Constraints:</strong> Preferences that should be satisfied when possible (e.g., teachers prefer to stay in the same room)</li>
+                    </ul>
+                    <p>The optimizer will try to find the best possible schedule within the given time limit while satisfying all hard constraints and as many soft constraints as possible.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Include external JavaScript file -->
+    <script src="{{ url_for('static', filename='js/scheduler.js') }}"></script>
+    <script>
+        // Initialize with template values
+        document.addEventListener("DOMContentLoaded", function() {
+            // Pass polling_interval from Flask to JavaScript
+            initJobPolling("{{ polling_interval | tojson }}");
+        });
+    </script>
+</body>
+</html>

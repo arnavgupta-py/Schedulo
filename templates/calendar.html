@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedulo - Timetable</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+    
+    <!-- Main layout -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="logo"><i class="fas fa-calendar-alt"></i></span>
+                <h1>Schedulo</h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="{{ url_for('chatbot.index') }}">
+                            <i class="fas fa-robot"></i>
+                            <span>AI Assistant</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a href="{{ url_for('calendar.index') }}">
+                            <i class="fas fa-calendar-week"></i>
+                            <span>Timetable</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('scheduler.index') }}">
+                            <i class="fas fa-magic"></i>
+                            <span>Optimizer</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-users"></i>
+                            <span>Teachers</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-book"></i>
+                            <span>Subjects</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-building"></i>
+                            <span>Venues</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-section">
+                <div class="user-profile">
+                    <div class="avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-info">
+                        <h3>{{ session.get('user_name', 'User') }}</h3>
+                        <p>{{ session.get('user_role', 'user') }}</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('auth.logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- Main content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1><i class="fas fa-calendar-week"></i> Timetable View</h1>
+                <div class="timetable-controls">
+                    <div class="view-controls">
+                        <select id="viewSelector" class="select-control">
+                            <option value="all">All Divisions</option>
+                            <option value="year">By Academic Year</option>
+                            <option value="division">By Division</option>
+                        </select>
+                        
+                        <select id="entitySelector" class="select-control">
+                            <option value="">All Divisions</option>
+                            <!-- Will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    
+                    <button id="collapseAllBtn" class="action-btn">
+                        <i class="fas fa-compress-alt"></i>
+                        <span>Collapse All</span>
+                    </button>
+                    
+                    <button id="printTimetable" class="action-btn">
+                        <i class="fas fa-print"></i>
+                        <span>Print</span>
+                    </button>
+                    
+                    <button id="exportTimetable" class="action-btn">
+                        <i class="fas fa-file-export"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+            </header>
+            
+            <div class="timetable-container">
+                <div class="table-wrapper">
+                    <table class="timetable-table">
+                        <thead>
+                            <tr>
+                                <th colspan="3">Days/Divisions</th>
+                                <th colspan="11" id="time-header-cells">Time Slots</th>
+                            </tr>
+                            <tr id="header-row">
+                                <!-- Headers will be dynamically generated here -->
+                            </tr>
+                        </thead>
+                        <tbody id="timetable-body">
+                            <!-- Rows will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- No events message -->
+                <div id="noEventsMessage" class="no-events-message" style="display: none;">
+                    <div class="message-content">
+                        <i class="fas fa-calendar-times"></i>
+                        <h2>No Timetable Available</h2>
+                        <p>No events are scheduled for the selected view.</p>
+                        <a href="{{ url_for('chatbot.index') }}" class="btn primary-btn">
+                            <i class="fas fa-robot"></i>
+                            <span>Go to AI Assistant</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Loading indicator -->
+                <div id="loadingIndicator" class="loading-indicator">
+                    <div class="spinner"></div>
+                    <p>Loading timetable...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Event Details Modal -->
+    <div id="eventModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="eventTitle">Event Details</h2>
+            
+            <div class="event-details">
+                <div class="detail-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Subject: </span>
+                    <span id="eventSubject">Subject Name</span>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Teacher: </span>
+                    <span id="eventTeacher">Teacher Name</span>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Venue: </span>
+                    <span id="eventVenue">Venue Name</span>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fas fa-clock"></i>
+                    <span>Time: </span>
+                    <span id="eventTime">10:00 - 11:00</span>
+                </div>
+                
+                <div class="detail-item">
+                    <i class="fas fa-users"></i>
+                    <span>Year/Division: </span>
+                    <span id="eventDivision">Division Name</span>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn secondary-btn" id="editEvent">
+                    <i class="fas fa-edit"></i>
+                    <span>Edit</span>
+                </button>
+                
+                <button class="btn danger-btn" id="deleteEvent">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Delete</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+</body>
+</html>
